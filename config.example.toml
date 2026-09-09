@@ -47,3 +47,12 @@ name = "silent-archive"
 url = "https://example.com/silent"
 # No ntfy_topic: this page is still fetched, snapshotted, and diffed in the
 # log on every check, it just never sends a push notification.
+
+[[target]]
+name = "utc-clock"
+url = "https://timeapi.io/api/v1/time/current/utc"
+interval_secs = 60
+# A live sanity check: this endpoint returns the current UTC time as JSON, so
+# it changes on every single fetch. Handy for confirming end-to-end that
+# fetching, diffing, and (if you set an ntfy_topic) notifying all work.
+# No ntfy_topic here on purpose — at this interval it would notify nonstop.
