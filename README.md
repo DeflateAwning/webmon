@@ -11,7 +11,7 @@ something changes.
   pass that only fetches targets whose interval has actually elapsed.
 - State (last-checked time per target) is a plain-text, hand-editable file —
   no SQLite.
-- Real logging via `log`/`fern`, to a file by default.
+- Real logging via `log`/`fern`, to stderr and a log file at once.
 
 ## Build
 
@@ -81,9 +81,10 @@ regex before trusting it to the timer):
 ./webmon --config config.toml run-now
 ```
 
-Add `-v` / `--verbose` to any of the above to also mirror log output to
-stderr and bump the log level to debug (logging to the configured log file
-always happens either way).
+Logs go to stderr and to `storage/webmon.log` at the same time. Add
+`-v` / `--verbose` to any of the above to bump the level from info to debug,
+or `-q` / `--quiet` to drop the stderr copy and log only to the file (handy
+under cron, where anything on stderr turns into mail).
 
 ## Contributing
 

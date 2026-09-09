@@ -22,10 +22,14 @@ struct Cli {
     #[arg(short, long, default_value = "config.toml", global = true)]
     config: PathBuf,
 
-    /// Also mirror log output to stderr (logging to the configured log file
-    /// always happens regardless of this flag).
+    /// Log at debug level instead of info (on both stderr and the log file).
     #[arg(short, long, global = true)]
     verbose: bool,
+
+    /// Don't mirror log output to stderr. Logging to the log file in the
+    /// storage dir always happens regardless of this flag.
+    #[arg(short, long, global = true)]
+    quiet: bool,
 
     #[command(subcommand)]
     command: Commands,
@@ -65,7 +69,7 @@ fn main() {
         }
     };
 
-    if let Err(e) = logging::init(&cfg.log_file(), cli.verbose, cli.verbose) {
+    if let Err(e) = logging::init(&cfg.log_file(), cli.verbose, cli.quiet) {
         eprintln!("error setting up logging: {:#}", e);
         std::process::exit(1);
     }
