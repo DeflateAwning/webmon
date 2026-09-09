@@ -30,16 +30,23 @@ pub fn notify_change(
         .unwrap_or_else(|| format!("Change detected: {}", target.name));
 
     // ntfy caps message bodies; trim very large diffs so the request
-    // doesn't get rejected, and say so at the end.
-    const MAX_BODY: usize = 3800;
-    let body = if diff_text.len() > MAX_BODY {
+    // doesn't get rejected, and say so at the end. The monitored URL goes on
+    // the first line, so it stays visible even when the diff is truncated.
+    const MAX_DIFF: usize = 3800;
+    let body = if diff_text.len() > MAX_DIFF {
+        // Don't slice mid-character: back off to the nearest char boundary.
+        let mut cut = MAX_DIFF;
+        while !diff_text.is_char_boundary(cut) {
+            cut -= 1;
+        }
         format!(
-            "{}\n\n... [diff truncated, {} bytes total]",
-            &diff_text[..MAX_BODY],
+            "{}\n\n{}\n\n... [diff truncated, {} bytes total]",
+            target.url,
+            &diff_text[..cut],
             diff_text.len()
         )
     } else {
-        diff_text.to_string()
+        format!("{}\n\n{}", target.url, diff_text)
     };
 
     let mut req = client

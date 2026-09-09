@@ -54,7 +54,8 @@ Everything lives under `storage_dir`, which is created on demand:
   within a single run). This keeps the implementation simple; for typical
   hourly-ish polling of a handful of pages this is not a bottleneck.
 - ntfy.sh delivery is a plain HTTPS POST to `{ntfy_server}/{topic}` with the
-  diff as the request body and the target name as the `Title` header —
+  monitored URL on the first line followed by the diff as the request body,
+  and the target name as the `Title` header —
   works with a self-hosted ntfy server too via `ntfy_server` /
   per-target `ntfy_server` override.
 
