@@ -1,0 +1,46 @@
+# webmon example configuration.
+#
+# Paths in [general] (storage_dir, log_file, state_file) are resolved
+# relative to *this config file's* directory if not absolute, so it's safe
+# to run webmon from cron with any working directory.
+
+[general]
+storage_dir = "./storage"          # fetched page snapshots go here
+log_file = "./webmon.log"          # plain-text log file (always written)
+state_file = "./webmon.state"      # plain-text "name<TAB>last-checked" file
+ntfy_server = "https://ntfy.sh"    # default ntfy server; a target can override it
+default_interval_secs = 3600       # default check interval = 1 hour
+user_agent = "webmon/0.1"
+timeout_secs = 30
+
+# One [[target]] block per page you want to watch.
+
+[[target]]
+name = "hn-frontpage"
+url = "https://news.ycombinator.com/"
+ntfy_topic = "my-hn-watch"         # ntfy.sh topic to notify on change
+# no include_regex/exclude_regex -> the whole page is monitored
+
+[[target]]
+name = "product-price"
+url = "https://example.com/product/123"
+interval_secs = 900                # check this one every 15 minutes
+ntfy_topic = "my-price-watch"
+ntfy_priority = "high"
+# Only watch the price element's text, ignore everything else on the page.
+# Add (?s) if the pattern needs to match across lines.
+include_regex = '<span class="price">[^<]+</span>'
+
+[[target]]
+name = "status-dot"
+url = "https://example.com/status"
+ntfy_topic = "my-status-watch"
+# Watch the whole page, but ignore the parts that change every load
+# (timestamps, request IDs, etc.) so they don't trigger false positives.
+exclude_regex = '(?m)^\s*(Last updated|Request ID):.*$'
+
+[[target]]
+name = "silent-archive"
+url = "https://example.com/silent"
+# No ntfy_topic: this page is still fetched, snapshotted, and diffed in the
+# log on every check, it just never sends a push notification.
