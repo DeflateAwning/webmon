@@ -3,6 +3,8 @@ name = "webmon"
 version = "0.1.0"
 edition = "2021"
 description = "Poll web pages on a schedule, diff them against the last snapshot, and push a plain-text diff to ntfy.sh when they change."
+license = "Unlicense"
+repository = "https://github.com/DeflateAwning/webmon"
 
 [[bin]]
 name = "webmon"

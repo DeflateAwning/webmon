@@ -84,11 +84,7 @@ pub struct RunOutcome {
 /// Fetches a target, compares it against its stored snapshot (through the
 /// configured include/exclude regex lens), notifies ntfy.sh on a change,
 /// and updates the on-disk snapshot with the freshly fetched content.
-pub fn process_target(
-    client: &Client,
-    cfg: &Config,
-    target: &TargetConfig,
-) -> Result<RunOutcome> {
+pub fn process_target(client: &Client, cfg: &Config, target: &TargetConfig) -> Result<RunOutcome> {
     let include_re = target
         .include_regex
         .as_deref()

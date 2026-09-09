@@ -151,6 +151,8 @@ impl Config {
     }
 
     pub fn interval_for(&self, target: &TargetConfig) -> u64 {
-        target.interval_secs.unwrap_or(self.general.default_interval_secs)
+        target
+            .interval_secs
+            .unwrap_or(self.general.default_interval_secs)
     }
 }
