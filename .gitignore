@@ -2,3 +2,6 @@ target/
 *.log
 *.state
 storage/
+
+config.toml
+
