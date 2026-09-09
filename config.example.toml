@@ -1,13 +1,16 @@
 # webmon example configuration.
 #
-# Paths in [general] (storage_dir, log_file, state_file) are resolved
-# relative to *this config file's* directory if not absolute, so it's safe
-# to run webmon from cron with any working directory.
-
+# `storage_dir` is the only path webmon needs. If it's relative, it's
+# resolved against *this config file's* directory, so it's safe to run
+# webmon from cron with any working directory. Everything webmon writes
+# lives inside it, and it's created automatically:
+#
+#   storage/webmon.log     plain-text log file (always written)
+#   storage/webmon.state   plain-text "name<TAB>last-checked" file
+#   storage/pages/         one snapshot file per target
+#
 [general]
-storage_dir = "./storage"          # fetched page snapshots go here
-log_file = "./webmon.log"          # plain-text log file (always written)
-state_file = "./webmon.state"      # plain-text "name<TAB>last-checked" file
+storage_dir = "./storage"          # defaults to "./storage" next to this file
 ntfy_server = "https://ntfy.sh"    # default ntfy server; a target can override it
 default_interval_secs = 3600       # default check interval = 1 hour
 user_agent = "webmon/0.1"

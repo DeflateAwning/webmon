@@ -38,11 +38,15 @@ each run:
 
 ## State and storage layout
 
-- `state_file`: plain text, one `name<TAB>unix-timestamp` line per target.
-  Delete a line (or the whole file) to force that target to be treated as
-  never-checked; hand-edit a timestamp to change when it's next due.
-- `storage_dir/<name>.snapshot`: the raw last-fetched page for each target,
-  one file per target.
+Everything lives under `storage_dir`, which is created on demand:
+
+- `storage_dir/webmon.log`: the log file.
+- `storage_dir/webmon.state`: plain text, one `name<TAB>unix-timestamp` line
+  per target. Delete a line (or the whole file) to force that target to be
+  treated as never-checked; hand-edit a timestamp to change when it's next
+  due.
+- `storage_dir/pages/<name>.snapshot`: the raw last-fetched page for each
+  target, one file per target.
 
 ## Notes
 

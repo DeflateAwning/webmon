@@ -28,8 +28,6 @@ a fully-commented walkthrough of every option. Minimal example:
 ```toml
 [general]
 storage_dir = "./storage"
-log_file = "./webmon.log"
-state_file = "./webmon.state"
 default_interval_secs = 3600
 
 [[target]]
@@ -38,7 +36,17 @@ url = "https://example.com"
 ntfy_topic = "my-ntfy-topic"
 ```
 
-Relative paths in `[general]` are resolved against the config file's own
+`storage_dir` is the only path to configure (it defaults to `./storage`).
+Everything webmon writes lives under it and is created automatically:
+
+```
+storage/
+├── webmon.log     log file
+├── webmon.state   last-checked time per target
+└── pages/         one snapshot file per target
+```
+
+A relative `storage_dir` is resolved against the config file's own
 directory, not the current working directory — so it doesn't matter what
 directory cron invokes webmon from.
 

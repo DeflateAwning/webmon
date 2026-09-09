@@ -2,11 +2,8 @@ use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 
-fn default_log_file() -> PathBuf {
-    PathBuf::from("webmon.log")
-}
-fn default_state_file() -> PathBuf {
-    PathBuf::from("webmon.state")
+fn default_storage_dir() -> PathBuf {
+    PathBuf::from("storage")
 }
 fn default_ntfy_server() -> String {
     "https://ntfy.sh".to_string()
@@ -23,16 +20,12 @@ fn default_timeout_secs() -> u64 {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct GeneralConfig {
-    /// Directory where fetched page snapshots are stored.
+    /// Directory holding everything webmon writes: the log file, the state
+    /// file, and a `pages/` subdirectory of fetched page snapshots. Created
+    /// automatically. Relative paths are resolved against the config file's
+    /// own directory.
+    #[serde(default = "default_storage_dir")]
     pub storage_dir: PathBuf,
-
-    /// Plain-text log file. Relative paths are resolved relative to the CWD.
-    #[serde(default = "default_log_file")]
-    pub log_file: PathBuf,
-
-    /// Plain-text state file recording, per target, the last time it was checked.
-    #[serde(default = "default_state_file")]
-    pub state_file: PathBuf,
 
     /// Default ntfy server, used unless a target overrides it.
     #[serde(default = "default_ntfy_server")]
@@ -101,25 +94,18 @@ impl Config {
         let mut cfg: Config = toml::from_str(&raw)
             .with_context(|| format!("failed to parse TOML config at {}", path.display()))?;
 
-        // Relative paths in the config (storage_dir, log_file, state_file)
-        // are resolved relative to the config file's own directory, not the
-        // process's current directory. This matters because this tool is
-        // meant to be invoked from cron with an arbitrary CWD.
+        // A relative `storage_dir` is resolved relative to the config file's
+        // own directory, not the process's current directory. This matters
+        // because this tool is meant to be invoked from cron with an
+        // arbitrary CWD.
         let base = path
             .parent()
             .filter(|p| !p.as_os_str().is_empty())
             .map(Path::to_path_buf)
             .unwrap_or_else(|| PathBuf::from("."));
-        let resolve = |p: &Path| -> PathBuf {
-            if p.is_absolute() {
-                p.to_path_buf()
-            } else {
-                base.join(p)
-            }
-        };
-        cfg.general.storage_dir = resolve(&cfg.general.storage_dir);
-        cfg.general.log_file = resolve(&cfg.general.log_file);
-        cfg.general.state_file = resolve(&cfg.general.state_file);
+        if !cfg.general.storage_dir.is_absolute() {
+            cfg.general.storage_dir = base.join(&cfg.general.storage_dir);
+        }
 
         if cfg.targets.is_empty() {
             anyhow::bail!("config has no [[target]] entries; nothing to monitor");
@@ -148,6 +134,21 @@ impl Config {
         }
 
         Ok(cfg)
+    }
+
+    /// Plain-text log file, inside the storage dir.
+    pub fn log_file(&self) -> PathBuf {
+        self.general.storage_dir.join("webmon.log")
+    }
+
+    /// Plain-text state file ("name<TAB>last-checked"), inside the storage dir.
+    pub fn state_file(&self) -> PathBuf {
+        self.general.storage_dir.join("webmon.state")
+    }
+
+    /// Auto-created subdirectory holding one snapshot file per target.
+    pub fn pages_dir(&self) -> PathBuf {
+        self.general.storage_dir.join("pages")
     }
 
     pub fn interval_for(&self, target: &TargetConfig) -> u64 {

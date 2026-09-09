@@ -29,8 +29,8 @@ fn sanitize_name(name: &str) -> String {
         .collect()
 }
 
-fn snapshot_path(storage_dir: &Path, target_name: &str) -> PathBuf {
-    storage_dir.join(format!("{}.snapshot", sanitize_name(target_name)))
+fn snapshot_path(pages_dir: &Path, target_name: &str) -> PathBuf {
+    pages_dir.join(format!("{}.snapshot", sanitize_name(target_name)))
 }
 
 /// Applies the target's include/exclude regexes to raw page content to
@@ -98,13 +98,10 @@ pub fn process_target(client: &Client, cfg: &Config, target: &TargetConfig) -> R
         .transpose()
         .context("invalid exclude_regex")?;
 
-    fs::create_dir_all(&cfg.general.storage_dir).with_context(|| {
-        format!(
-            "failed to create storage dir {}",
-            cfg.general.storage_dir.display()
-        )
-    })?;
-    let path = snapshot_path(&cfg.general.storage_dir, &target.name);
+    let pages_dir = cfg.pages_dir();
+    fs::create_dir_all(&pages_dir)
+        .with_context(|| format!("failed to create pages dir {}", pages_dir.display()))?;
+    let path = snapshot_path(&pages_dir, &target.name);
 
     log::debug!("fetching '{}' ({})", target.name, target.url);
     let resp = client

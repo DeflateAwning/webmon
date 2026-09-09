@@ -65,7 +65,7 @@ fn main() {
         }
     };
 
-    if let Err(e) = logging::init(&cfg.general.log_file, cli.verbose, cli.verbose) {
+    if let Err(e) = logging::init(&cfg.log_file(), cli.verbose, cli.verbose) {
         eprintln!("error setting up logging: {:#}", e);
         std::process::exit(1);
     }
@@ -92,7 +92,7 @@ fn main() {
 /// Runs one pass over all targets: due (or forced) targets get fetched,
 /// diffed, and notified; the state file is updated and saved at the end.
 fn run_pass(cfg: &Config, force: bool) -> Result<()> {
-    let mut state = State::load(&cfg.general.state_file)?;
+    let mut state = State::load(&cfg.state_file())?;
     let client = monitor::build_client(cfg)?;
     let now = Utc::now().timestamp();
 
@@ -130,7 +130,7 @@ fn run_pass(cfg: &Config, force: bool) -> Result<()> {
         }
     }
 
-    state.save(&cfg.general.state_file)?;
+    state.save(&cfg.state_file())?;
     log::info!(
         "pass complete: {} target(s) checked, {} changed",
         checked,
